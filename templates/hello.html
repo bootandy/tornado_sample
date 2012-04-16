@@ -1,0 +1,27 @@
+<html>
+<body>
+Hello {{user}} <a href='logout'>logout</a> <br/><br/>
+
+
+<a href='message'>send new message</a>
+<br/>
+
+<br/>
+<br/>
+Messages sent:
+
+<table>
+	<th>From</th>
+	<th>To</th>
+	<th>Message</th>
+	{% for m in messages %}
+		<tr>
+			<td> {{ m['from']}}</td>
+			<td> {{ m['to']}} </td>
+			<td> {{ m['message']}}</td>
+		</tr>
+	{% end %}
+</table>
+
+</body>
+</html>

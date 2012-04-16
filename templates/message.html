@@ -1,0 +1,34 @@
+<html>
+<body>
+Hello {{user}} <a href='logout'>logout</a> <br/>
+
+<br/><br/>
+
+Message to:
+<br/>
+
+
+ <form id="login_form" action="message" method="post">
+ 	<label class="grey" for="log">To</label><br />
+ 	<select name='to'>
+ 		{% for u in users %}
+            <option>{{u['user']}}</option>
+        {% end %}
+ 	</select>
+ 	<br/>
+
+    <label class="grey" for="log">Message</label><br />
+    <textarea name="message" style="width:99%" id="message" cols="80" rows = "10">
+    </textarea>
+	<br>	
+
+    <input type="submit" id="loginbtn" name="send" value="SEND" class="button" /> 
+    <br />
+</form>
+
+<br/>
+<br/>
+
+
+</body>
+</html>
