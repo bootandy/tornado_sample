@@ -1,8 +1,8 @@
 # Python imports
 import base64
-import asyncmongo
 from bson.objectid import ObjectId
 import os
+import bcrypt
 
 # Tornado imports
 import pymongo
@@ -55,7 +55,7 @@ class Application(tornado.web.Application):
 
     # sync is easy for now
     self.syncconnection = pymongo.Connection(MONGO_SERVER, 27017)
-    self.syncdb = self.syncconnection ["thanks"]
+    self.syncdb = self.syncconnection ["test-thank"]
     self.all_emails = self.syncdb.users.distinct( 'emails')
 
     #self.syncconnection.close()
@@ -82,8 +82,10 @@ class LoginHandler(BaseHandler):
   def post(self):
     email = self.get_argument("email", "")
     password = self.get_argument("password", "")
-    auth = self.application.syncdb.authenticate(email, password) # DB lookup here
-    if auth:
+
+    user = self.application.syncdb['users'].find_one( { 'user': email } )
+    
+    if user and user['password'] and bcrypt.hashpw(password, user['password']) == user['password']:
       self.set_current_user(email)
       self.redirect("hello")
     else:
@@ -106,7 +108,13 @@ class RegisterHandler(LoginHandler):
   def post(self):
     email = self.get_argument("email", "")
     password = self.get_argument("password", "")
-    auth = self.application.syncdb.add_user(email, password) # DB lookup here
+    hashed_pass = bcrypt.hashpw(password, bcrypt.gensalt(8))
+
+    user = {}
+    user['user'] = email
+    user['password'] = hashed_pass
+
+    auth = self.application.syncdb['users'].save(user)
     self.set_current_user(email)
 
     self.redirect("hello")
