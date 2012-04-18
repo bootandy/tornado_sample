@@ -56,7 +56,6 @@ class Application(tornado.web.Application):
     # sync is easy for now
     self.syncconnection = pymongo.Connection(MONGO_SERVER, 27017)
     self.syncdb = self.syncconnection ["test-thank"]
-    self.all_emails = self.syncdb.users.distinct( 'emails')
 
     #self.syncconnection.close()
 
@@ -107,6 +106,13 @@ class RegisterHandler(LoginHandler):
 
   def post(self):
     email = self.get_argument("email", "")
+
+    already_taken = self.application.syncdb['users'].find_one( { 'user': email } )
+    if already_taken:
+      error_msg = u"?error=" + tornado.escape.url_escape("Login name already taken")
+      self.redirect(u"/login" + error_msg)
+
+
     password = self.get_argument("password", "")
     hashed_pass = bcrypt.hashpw(password, bcrypt.gensalt(8))
 
@@ -137,7 +143,7 @@ class MessageHandler(BaseHandler):
   def get(self):
     if self.get_secure_cookie("user"):
       
-      users = self.application.syncdb['system.users'].find()
+      users = self.application.syncdb['users'].find()
 
       self.render("message.html", user=self.get_current_user(), users=users )
     else:
