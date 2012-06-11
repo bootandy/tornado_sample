@@ -3,9 +3,9 @@ import os, os.path, sys
 import tornado.web
 import tornado.testing
 import mox
-from app import HelloHandler
+import urllib
 from app import Application
-from app import MessageHandler
+from handlers.handlers import *
 
 
 
@@ -44,5 +44,23 @@ class TestAuthenticatedHandlers(tornado.testing.AsyncHTTPTestCase):
         resp = self.fetch('/hello')
         self.assertEqual(resp.code, 200)
         self.assertIn( "<td>a mocked message</td>", resp.body )
+        self.mox.VerifyAll()
+
+    def test_post_message(self):
+        self.mox.StubOutWithMock(MessageHandler, 'get_current_user', use_mock_anything=True)
+        MessageHandler.get_current_user().AndReturn("test_user")
+        
+        self.mox.StubOutWithMock(HelloHandler, 'get_current_user', use_mock_anything=True)
+        HelloHandler.get_current_user().AndReturn("test_user")
+        HelloHandler.get_current_user().AndReturn("test_user")
+
+        msg = { 'to':'alice', 'from':'test_user', 'message':'testing'}
+        self.mox.StubOutWithMock(MessageHandler, 'save_message', use_mock_anything=True)
+        MessageHandler.save_message(msg).AndReturn(True)
+
+        self.mox.ReplayAll()
+        args = { 'to':'alice', 'message':'testing'}
+        resp = self.fetch('/message', method='POST', body=urllib.urlencode(args))
+        self.assertEqual(resp.code, 200)
         self.mox.VerifyAll()
 
