@@ -1,2 +1,4 @@
 simple tornado & mongodb app using authentication
 
+# ----- to Run tests: ------
+python -m tornado.testing  tests.basic

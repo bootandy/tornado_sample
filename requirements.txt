@@ -4,3 +4,4 @@
  pymongo==2.1
  tornado==2.2
  py-bcrypt
+ mox
