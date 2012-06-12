@@ -1,3 +1,5 @@
+# Runs tests using mox which mocks the login phase
+
 # encoding: utf-8
 import os, os.path, sys
 import tornado.web
