@@ -1,4 +1,6 @@
 simple tornado & mongodb app using authentication
 
+# slidys and notifications
+
 # ----- to Run tests: ------
 python -m tornado.testing  tests.basic
