@@ -24,24 +24,30 @@ class Application(tornado.web.Application):
     def __init__(self, **overrides):
         #self.config = self._get_config()
         handlers = [
-        url(r'/', LoginHandler, name='index'),
+        url(r'/', HelloHandler, name='index'),
         url(r'/hello', HelloHandler, name='hello'),
         url(r'/message', MessageHandler, name='message'),
-        url(r'/login', LoginHandler, name='login'),
+        url(r'/slidy', SlidyHandler, name='slidy'),
+        url(r'/notification', NotificationHandler, name='notification'),
+
+        url(r'/login', LoginHandler, name='hello'),
+        url(r'/twitter_login', TwitterLoginHandler, name='twitter_login'),
         url(r'/register', RegisterHandler, name='register'),
         url(r'/logout', LogoutHandler, name='logout'),
         ]
 
         #xsrf_cookies is for XSS protection add this to all forms: {{ xsrf_form_html() }}
         settings = {
-        'static_path': os.path.join(os.path.dirname(__file__), 'static'),
-        'template_path': os.path.join(os.path.dirname(__file__), 'templates'),
-        "cookie_secret":    base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes),
+            'static_path': os.path.join(os.path.dirname(__file__), 'static'),
+            'template_path': os.path.join(os.path.dirname(__file__), 'templates'),
+            "cookie_secret":    base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes),
+            'twitter_consumer_key': 'KEY',
+            'twitter_consumer_secret' :'SECRET',
             #'xsrf_cookies': True,
             'debug':True,
             #'debug':False,
             'log_file_prefix':"tornado.log",
-            }
+        }
 
         tornado.web.Application.__init__(self, handlers, **settings) # debug=True ,
         

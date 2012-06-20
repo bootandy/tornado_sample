@@ -1,26 +1,29 @@
 <html>
+<head>
+    <title>Login</title>
+    <link href="/static/css/jcarousel.css" rel="stylesheet" />
+    <link href="/static/css/notification.css" rel="stylesheet" />
+</head>
 <body>
-{{ message }}
-<h1>please login:</h1>
-<br/>
+    <hr/>
+    
+    <h1>please login:</h1>
+    <br/>
 
 
- <form id="login_form" action="login" method="post">
-    <label class="grey" for="log">Email Address</label><br />
-    <input type="text" name="email" style="width:99%" id="email"><br>
-    <label class="grey" for="pwd">Password</label><br />
-    <input type="password" name="password" style="width:99%" id="password"><br />
-    <label>
-<!--     <input name="remember" type="checkbox" checked="checked" value="1" /> &nbsp;Remember me</label><br /><br /> -->
-    <input type="submit" id="loginbtn" name="login" value="LOGIN" class="button"><br />
-    <!-- <a href="forgotpassword.php">Forgot your password?</a> -->
-</form>
+     <form id="login_form" action="login" method="post">
+        <label class="grey" for="log">Email Address</label><br />
+        <input type="text" name="email" style="width:99%" id="email"><br>
+        <label class="grey" for="pwd">Password</label><br />
+        <input type="password" name="password" style="width:99%" id="password"><br />
+        <input type="submit" id="loginbtn" name="login" value="LOGIN" class="button"><br />
+    </form>
 
-<br/>
-
-<a href='register'>register</a>
+    <br/>
+    <a href='register'>register</a>
+    <br/>
+    <a href='twitter_login'> Login with Twitter </a> <br/>
 
 </body>
-
 
 </html>

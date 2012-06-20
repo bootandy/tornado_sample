@@ -1,0 +1,24 @@
+<html>
+<head>
+    <!-- based on: http://stackoverflow.com/questions/366857/notify-panel-similar-to-stackoverflows -->
+    <title>Notifications</title>
+    <link href="/static/css/notification.css" rel="stylesheet" />
+</head>
+<body>
+    {% if notification %}
+        <div id='notification' style="display: none;">
+            <span>{{ notification }}</span>
+            <a href="#" class="close-notify">X</a>
+        </div>
+    {% end %}
+
+    <h1>Notification demo:</h1>
+    <br/>
+    <p>lorum ipsum</p>
+
+    
+    <script src="/static/js/jquery-1.7.2.min.js"></script>
+    <script src="/static/js/notification.js"></script>
+</body>
+
+</html>

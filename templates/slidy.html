@@ -1,0 +1,36 @@
+<html>
+<head>
+    <title>Slidy</title>
+    <link href="/static/css/jcarousel.css" rel="stylesheet" />
+</head>
+<body>
+    <hr/>
+    
+    <br/>
+    <h3>Past Messages:</h3>
+    <ul id="mycarousel" class="jcarousel-skin-tango">
+        {% for m in messages %}
+            <li>
+                <h3>{{ m["from"]}} to: {{ m["to"]}} </h3>
+                <h1>{{ m["message"]}}</h1>
+            </li>
+        {% end %}
+    </ul>
+    <hr/>
+
+    <script src="/static/js/jquery-1.7.2.min.js"></script>
+    <script src="/static/js/jquery.jcarousel.min.js"></script>
+    <script>
+    jQuery(document).ready(function() {
+        jQuery('#mycarousel').jcarousel({
+            vertical: true,
+            auto: 1,
+            wrap: 'last',
+            animation: 1000,
+            scroll: 1
+        });
+    });
+    </script>
+</body>
+
+</html>

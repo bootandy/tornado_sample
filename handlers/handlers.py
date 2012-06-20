@@ -5,8 +5,9 @@ import bcrypt
 
 import tornado.auth
 import tornado.escape
+import tornado.gen
 import tornado.httpserver
-
+import logging
 
 class BaseHandler(tornado.web.RequestHandler):
 
@@ -21,10 +22,21 @@ class BaseHandler(tornado.web.RequestHandler):
             return None
 
 
+class NotificationHandler(BaseHandler):
+    def get(self):
+        messages = self.application.syncdb.messages.find()
+        self.render("notification.html", messages=messages, notification=self.get_argument("notification","") )
+
+class SlidyHandler(BaseHandler):
+    def get(self):
+        messages = self.application.syncdb.messages.find()
+        self.render("slidy.html", messages=messages, notification=self.get_argument("notification","") )
+
 class LoginHandler(BaseHandler):
 
     def get(self):
-        self.render("login.html", next=self.get_argument("next","/"), message=self.get_argument("error","") )
+        messages = self.application.syncdb.messages.find()
+        self.render("login.html", notification=self.get_argument("notification","") )
 
     def post(self):
         email = self.get_argument("email", "")
@@ -37,7 +49,7 @@ class LoginHandler(BaseHandler):
             self.set_current_user(email)
             self.redirect("hello")
         else:
-            error_msg = u"?error=" + tornado.escape.url_escape("Login incorrect.")
+            error_msg = u"?notification=" + tornado.escape.url_escape("Login incorrect.")
             self.redirect(u"/login" + error_msg)
 
     def set_current_user(self, user):
@@ -74,6 +86,23 @@ class RegisterHandler(LoginHandler):
 
         self.redirect("hello")
 
+class TwitterLoginHandler(tornado.web.RequestHandler,
+                          tornado.auth.TwitterMixin):
+    @tornado.web.asynchronous
+    def get(self):
+        if self.get_argument("oauth_token", None):
+            self.get_authenticated_user(self.async_callback(self._on_auth))
+            return
+        self.authorize_redirect()
+
+    def _on_auth(self, user):
+        if not user:
+            raise tornado.web.HTTPError(500, "Twitter auth failed")
+        print "Auth worked"
+        user_details = self.application.db_access.get_user_by_tw_id( tw_user['username'] )
+        logging.info(user_details)
+        self.set_current_user(user_details)
+
 
 class LogoutHandler(BaseHandler):
     def get(self):
@@ -83,11 +112,8 @@ class LogoutHandler(BaseHandler):
 class HelloHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
-        messages = self.get_messages()
-        self.render("hello.html", user=self.get_current_user(), messages=messages )
-
-    def get_messages(self):
-        return self.application.syncdb.messages.find()
+        messages = self.application.syncdb.messages.find()
+        self.render("hello.html", user=self.get_current_user(), messages=messages, notification=self.get_argument("notification","") )
 
     def post(self):
         return self.get()
@@ -97,7 +123,7 @@ class MessageHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
         users = self.application.syncdb['users'].find()
-        self.render("message.html", user=self.get_current_user(), users=users )
+        self.render("message.html", user=self.get_current_user(), users=users, notification=self.get_argument("notification","") )
 
     def post(self):
         sent_to = self.get_argument('to')
@@ -109,7 +135,7 @@ class MessageHandler(BaseHandler):
         msg['message'] = message
         
         if self.save_message(msg):
-            self.redirect(u"/hello")
+            self.redirect(u"/hello?notification=" + tornado.escape.url_escape("Message Sent"))
         else:
             print "error_msg"
 
