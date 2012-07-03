@@ -138,8 +138,11 @@ class LogoutHandler(BaseHandler):
 class HelloHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
-        messages = self.application.syncdb.messages.find()
+        messages = self.get_messages()
         self.render("hello.html", user=self.get_current_user(), messages=messages, notification=self.get_argument("notification","") )
+    
+    def get_messages(self):
+        return self.application.syncdb.messages.find()
 
     def post(self):
         return self.get()

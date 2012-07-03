@@ -10,6 +10,7 @@ from app import Application
 from handlers.handlers import *
 
 
+# Tests based around Mocks
 
 class TestAuthenticatedHandlers(tornado.testing.AsyncHTTPTestCase):
     def get_app(self):

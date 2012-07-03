@@ -21,9 +21,7 @@ class BaseHTTPTestCase(AsyncHTTPTestCase, LogTrapTestCase, HTTPClientMixin):
        super(BaseHTTPTestCase, self).setUp()
        self.client = TestClient(self)
 
-# tests/test_handlers.py
-
-#from base import BaseHTTPTestCase
+# Tests based around remembering the user id after login.
 
 class HandlersTestCase(BaseHTTPTestCase):
 
