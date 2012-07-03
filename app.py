@@ -29,11 +29,14 @@ class Application(tornado.web.Application):
         url(r'/message', MessageHandler, name='message'),
         url(r'/slidy', SlidyHandler, name='slidy'),
         url(r'/notification', NotificationHandler, name='notification'),
+        url(r'/fb_demo', FacebookDemoHandler, name='fb_demo'),
 
-        url(r'/login', LoginHandler, name='hello'),
+        url(r'/login', LoginHandler, name='login'),
         url(r'/twitter_login', TwitterLoginHandler, name='twitter_login'),
+        url(r'/facebook_login', FacebookLoginHandler, name='facebook_login'),
         url(r'/register', RegisterHandler, name='register'),
         url(r'/logout', LogoutHandler, name='logout'),
+
         ]
 
         #xsrf_cookies is for XSS protection add this to all forms: {{ xsrf_form_html() }}
@@ -43,9 +46,12 @@ class Application(tornado.web.Application):
             "cookie_secret":    base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes),
             'twitter_consumer_key': 'KEY',
             'twitter_consumer_secret' :'SECRET',
+            'facebook_app_id': '180378538760459',
+            'facebook_secret': '7b82b89eb6aa0d3359e2036e4d1eedf0',
+            'facebook_registration_redirect_url': 'http://localhost:8888/facebook_login',    
+
             #'xsrf_cookies': True,
             'debug':True,
-            #'debug':False,
             'log_file_prefix':"tornado.log",
         }
 

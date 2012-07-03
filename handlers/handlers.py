@@ -86,7 +86,7 @@ class RegisterHandler(LoginHandler):
 
         self.redirect("hello")
 
-class TwitterLoginHandler(tornado.web.RequestHandler,
+class TwitterLoginHandler(LoginHandler,
                           tornado.auth.TwitterMixin):
     @tornado.web.asynchronous
     def get(self):
@@ -99,9 +99,35 @@ class TwitterLoginHandler(tornado.web.RequestHandler,
         if not user:
             raise tornado.web.HTTPError(500, "Twitter auth failed")
         print "Auth worked"
-        user_details = self.application.db_access.get_user_by_tw_id( tw_user['username'] )
-        logging.info(user_details)
-        self.set_current_user(user_details)
+        #user_details = self.application.syncdb['users'].find_one( {'twitter': tw_user['username'] } )
+        # Create user if user not found
+        
+        self.set_current_user(tw_user['username'])
+        self.redirect("hello")
+
+
+class FacebookLoginHandler(LoginHandler, tornado.auth.FacebookGraphMixin):
+    @tornado.web.asynchronous
+    def get(self):
+        if self.get_argument('code', False):
+            self.get_authenticated_user(
+                redirect_uri=self.settings['facebook_registration_redirect_url'],
+                client_id=self.application.settings['facebook_app_id'],
+                client_secret=self.application.settings['facebook_secret'],
+                code=self.get_argument('code'),
+                callback=self.async_callback(self._on_login)
+            )
+            return
+        self.authorize_redirect(redirect_uri=self.settings['facebook_registration_redirect_url'],
+                                client_id=self.settings['facebook_app_id'],
+                                extra_params={'scope': 'offline_access'})  # read_stream,
+
+    def _on_login(self, fb_user):
+        #user_details = self.application.syncdb['users'].find_one( {'facebook': fb_user['id']} )
+        # Create user if user not found
+        self.set_current_user(fb_user['id'])
+        self.redirect("hello")        
+
 
 
 class LogoutHandler(BaseHandler):
@@ -117,7 +143,6 @@ class HelloHandler(BaseHandler):
 
     def post(self):
         return self.get()
-
 
 class MessageHandler(BaseHandler):
     @tornado.web.authenticated
@@ -142,3 +167,7 @@ class MessageHandler(BaseHandler):
     def save_message(self, msg):
         return self.application.syncdb['messages'].insert(msg)
 
+class FacebookDemoHandler(BaseHandler):
+    @tornado.web.authenticated
+    def get(self):
+        self.render("fb_demo.html", user=self.get_current_user(), fb_app_id=self.settings['facebook_app_id'] )
