@@ -1,0 +1,53 @@
+<html>
+<head>
+	<title>Popup</title>
+    <link href="../static/css/popup.css" rel="stylesheet" />
+</head>
+<body>
+	<hr/>
+	Hello a demo custom popup which can post to a form:<br/>
+	based on this <a href='http://stackoverflow.com/questions/1328723/how-to-generate-a-simple-popup-using-jquery'>SO post</a><br/>
+
+	<hr/>
+	<a href="/contact" id="contact">Click Here</a>
+	<div class="messagepop pop">
+	    <form method="post" id="new_message" action="/messages">
+	        <p><label for="body">Message</label><textarea rows="6" name="body" id="body" cols="35"></textarea></p>
+	        <p><input type="submit" value="Send Message" name="commit" id="message_submit"/> or <a class="close" href="/">Cancel</a></p>
+	    </form>
+	</div>
+
+    <script src="/static/js/jquery-1.7.2.min.js"></script>
+	<script>
+		function deselect() {
+		    $(".pop").slideFadeToggle(function() { 
+		        $("#contact").removeClass("selected");
+		    });    
+		}
+
+		$(function() {
+		    $("#contact").live('click', function() {
+		        if($(this).hasClass("selected")) {
+		            deselect();               
+		        } else {
+		            $(this).addClass("selected");
+		            $(".pop").slideFadeToggle(function() { 
+		                $("#body").focus();
+		            });
+		        }
+		        return false;
+		    });
+
+		    $(".close").live('click', function() {
+		        deselect();
+		        return false;
+		    });
+		});
+
+		$.fn.slideFadeToggle = function(easing, callback) {
+		    return this.animate({ opacity: 'toggle', height: 'toggle' }, "fast", easing, callback);
+		};
+	</script>
+
+</body>
+</html>

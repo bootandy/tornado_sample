@@ -30,6 +30,7 @@ class Application(tornado.web.Application):
         url(r'/slidy', SlidyHandler, name='slidy'),
         url(r'/notification', NotificationHandler, name='notification'),
         url(r'/fb_demo', FacebookDemoHandler, name='fb_demo'),
+        url(r'/popup', PopupHandler, name='popup_demo'),
 
         url(r'/login', LoginHandler, name='login'),
         url(r'/twitter_login', TwitterLoginHandler, name='twitter_login'),
@@ -46,8 +47,8 @@ class Application(tornado.web.Application):
             "cookie_secret":    base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes),
             'twitter_consumer_key': 'KEY',
             'twitter_consumer_secret' :'SECRET',
-            'facebook_app_id': 'APP_ID',
-            'facebook_secret': 'SECRET',
+            'facebook_app_id': '180378538760459',
+            'facebook_secret': '7b82b89eb6aa0d3359e2036e4d1eedf0',
             'facebook_registration_redirect_url': 'http://localhost:8888/facebook_login',    
 
             #'xsrf_cookies': True,

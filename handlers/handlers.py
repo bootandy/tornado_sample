@@ -32,6 +32,11 @@ class SlidyHandler(BaseHandler):
         messages = self.application.syncdb.messages.find()
         self.render("slidy.html", messages=messages, notification=self.get_argument("notification","") )
 
+class PopupHandler(BaseHandler):
+    def get(self):
+        messages = self.application.syncdb.messages.find()
+        self.render("popup.html", notification=self.get_argument("notification","") )
+
 class LoginHandler(BaseHandler):
 
     def get(self):
