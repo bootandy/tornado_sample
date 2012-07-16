@@ -9,24 +9,37 @@
 	based on this <a href='http://stackoverflow.com/questions/1328723/how-to-generate-a-simple-popup-using-jquery'>SO post</a><br/>
 
 	<hr/>
-	<a href="/contact" id="contact">Click Here</a>
+	<a href="/contact" class="contact">Click Here</a>
+	<a href="/contact" class="contact">Click Here</a>
+	<a href="/contact" class="contact">Click Here</a>
+	<a href="/contact" class="contact">Click Here</a>
+
 	<div class="messagepop pop">
-	    <form method="post" id="new_message" action="/messages">
-	        <p><label for="body">Message</label><textarea rows="6" name="body" id="body" cols="35"></textarea></p>
+	    <form method="post" id="new_message" action="javascript:do_post()">
+	        <p>
+        		<!-- <label for="body">Message</label> -->
+        		<div id='bodydiv'>
+		        	<textarea rows="2" name="body" id="body" ></textarea>
+		        	<span id="body_at_name"> - @andy</span>
+		        </div>
+	        </p>
 	        <p><input type="submit" value="Send Message" name="commit" id="message_submit"/> or <a class="close" href="/">Cancel</a></p>
 	    </form>
 	</div>
 
     <script src="/static/js/jquery-1.7.2.min.js"></script>
 	<script>
+		function do_post() {
+			alert('send message not wired up');
+		}
 		function deselect() {
 		    $(".pop").slideFadeToggle(function() { 
-		        $("#contact").removeClass("selected");
+		        $(".contact").removeClass("selected");
 		    });    
 		}
 
 		$(function() {
-		    $("#contact").live('click', function() {
+		    $(".contact").live('click', function() {
 		        if($(this).hasClass("selected")) {
 		            deselect();               
 		        } else {
