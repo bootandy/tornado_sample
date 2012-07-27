@@ -31,6 +31,7 @@ class Application(tornado.web.Application):
         url(r'/notification', NotificationHandler, name='notification'),
         url(r'/fb_demo', FacebookDemoHandler, name='fb_demo'),
         url(r'/popup', PopupHandler, name='popup_demo'),
+        url(r'/tail', TailHandler, name='tail_demo'),
 
         url(r'/login', LoginHandler, name='login'),
         url(r'/twitter_login', TwitterLoginHandler, name='twitter_login'),

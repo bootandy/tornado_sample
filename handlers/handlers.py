@@ -9,6 +9,11 @@ import tornado.gen
 import tornado.httpserver
 import logging
 
+import time
+from tornado.ioloop import IOLoop
+from tornado.web import asynchronous, RequestHandler, Application 
+
+
 class BaseHandler(tornado.web.RequestHandler):
 
     def get_login_url(self):
@@ -179,3 +184,29 @@ class FacebookDemoHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
         self.render("fb_demo.html", user=self.get_current_user(), fb_app_id=self.settings['facebook_app_id'] )
+
+
+""" async demo """
+class TailHandler(BaseHandler):
+        
+    @asynchronous
+    def get(self):
+        self.file = open('data/to_read.txt', 'r')
+        self.pos = self.file.tell()
+
+        def _read_file():
+            # Read some amout of bytes here. You can't read until newline as it 
+            # would block
+            line = self.file.read(40)
+            last_pos = self.file.tell()
+            if not line:
+                self.file.close()
+                self.file = open('data/to_read.txt', 'r')
+                self.file.seek(last_pos)
+                pass
+            else:
+                self.write(line)
+                self.flush()
+
+            IOLoop.instance().add_timeout(time.time() + 1, _read_file)
+        _read_file()
