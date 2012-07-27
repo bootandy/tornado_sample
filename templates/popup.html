@@ -5,61 +5,69 @@
 </head>
 <body>
 	<hr/>
-	Hello a demo custom popup which can post to a form:<br/>
-	based on this <a href='http://stackoverflow.com/questions/1328723/how-to-generate-a-simple-popup-using-jquery'>SO post</a><br/>
+	A beautiful popup from this <a href='http://www.alessioatzeni.com/blog/login-box-modal-dialog-window-with-css-and-jquery/'>tutorial</a><br/>
 
 	<hr/>
-	<a href="/contact" class="contact">Click Here</a>
-	<a href="/contact" class="contact">Click Here</a>
-	<a href="/contact" class="contact">Click Here</a>
-	<a href="/contact" class="contact">Click Here</a>
+	<a href="#login-box" class="login-window">Click HERE to see popup</a>
+	<br/>
 
-	<div class="messagepop pop">
-	    <form method="post" id="new_message" action="javascript:do_post()">
-	        <p>
-        		<!-- <label for="body">Message</label> -->
-        		<div id='bodydiv'>
-		        	<textarea rows="2" name="body" id="body" ></textarea>
-		        	<span id="body_at_name"> - @andy</span>
-		        </div>
-	        </p>
-	        <p><input type="submit" value="Send Message" name="commit" id="message_submit"/> or <a class="close" href="/">Cancel</a></p>
-	    </form>
+	<div id="login-box" class="login-popup">
+        <a href="#" class="close" >
+        	<img src="/static/img/close_pop.png" class="btn_close" title="Close Window" alt="Close" />
+        </a>
+      	<form method="post" class="signin" action="#">
+            <fieldset class="textbox">
+	        	<label class="username">
+	            <span>Username or email</span>
+	            <!-- placeholder is chrome/safari only -->
+	            <input id="username" name="username" value="" type="text" autocomplete="on" placeholder="Username">
+	            </label>
+	            <label class="password">
+	            <span>Password</span>
+	            <input id="password" name="password" value="" type="password" placeholder="Password">
+	            </label>
+	            <button class="submit button" type="button">Sign in</button>
+	            <p>
+	            	<a class="forgot" href="#">Forgot your password?</a>
+	            </p>        
+            </fieldset>
+      	</form>
 	</div>
-
     <script src="/static/js/jquery-1.7.2.min.js"></script>
-	<script>
-		function do_post() {
-			alert('send message not wired up');
-		}
-		function deselect() {
-		    $(".pop").slideFadeToggle(function() { 
-		        $(".contact").removeClass("selected");
-		    });    
-		}
+    <script>
+		$(document).ready(function() {
+			$('a.login-window').click(function() {
+				
+		        //Getting the variable's value from a link 
+				var loginBox = $(this).attr('href');
 
-		$(function() {
-		    $(".contact").live('click', function() {
-		        if($(this).hasClass("selected")) {
-		            deselect();               
-		        } else {
-		            $(this).addClass("selected");
-		            $(".pop").slideFadeToggle(function() { 
-		                $("#body").focus();
-		            });
-		        }
-		        return false;
-		    });
-
-		    $(".close").live('click', function() {
-		        deselect();
-		        return false;
-		    });
+				//Fade in the Popup
+				$(loginBox).fadeIn(300);
+				
+				//Set the center alignment padding + border see css style
+				var popMargTop = ($(loginBox).height() + 24) / 2; 
+				var popMargLeft = ($(loginBox).width() + 24) / 2; 
+				
+				$(loginBox).css({ 
+					'margin-top' : -popMargTop,
+					'margin-left' : -popMargLeft
+				});
+				
+				// Add the mask to body
+				$('body').append('<div id="mask"></div>');
+				$('#mask').fadeIn(300);
+				
+				return false;
+			});
+			
+			// When clicking on the button close or the mask layer the popup closed
+			$('a.close, #mask').live('click', function() { 
+			  $('#mask , .login-popup').fadeOut(300 , function() {
+				$('#mask').remove();  
+			}); 
+			return false;
+			});
 		});
-
-		$.fn.slideFadeToggle = function(easing, callback) {
-		    return this.animate({ opacity: 'toggle', height: 'toggle' }, "fast", easing, callback);
-		};
 	</script>
 
 </body>
