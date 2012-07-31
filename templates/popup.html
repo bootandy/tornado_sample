@@ -57,6 +57,10 @@
 				$('body').append('<div id="mask"></div>');
 				$('#mask').fadeIn(300);
 				
+				// Select first input / textarea in popup
+				var input = $(popup).find("input:first, textarea:first")
+	            input[0].focus();
+
 				return false;
 			});
 			
