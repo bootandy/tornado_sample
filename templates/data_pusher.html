@@ -1,0 +1,57 @@
+<html>
+<body>
+	Hello {{user}} <a href='logout'>logout</a> <br/>
+
+
+	
+	<br/>
+	New Message to:
+	<br/>
+    <label class="grey" for="log">To Push:</label><br />
+    <textarea name="message" style="width:99%" id="message" cols="80" rows = "10">
+    </textarea>
+	<br />	
+
+    <button id='poster' >Send it</button>
+    <br/>
+
+	<button id='more' >Load More</button>
+	<div id='data'>
+	</div>
+
+    <script src="/static/js/jquery-1.7.2.min.js"></script>
+    <script>
+    	var last_id = -1
+	    $("#poster").click(function(){
+		  	$.ajax({
+			  	url:"/pusher", 
+			  	type: "POST",
+				data:{'message':$("#message").val()}, 
+		 	}).done(function() {
+		 	 	console.log('return');
+			});
+		});
+
+	    $("#more").click(function(){
+	    	data = ''
+	    	if (last_id != -1) {
+	    		data += 'id=' + last_id
+	    	}
+		  	$.ajax({
+			  	url:"/pusher_raw", 
+			  	type: "GET",
+			  	dataType:'json',
+			  	data: data,
+		 	}).done(function(data) { 
+		 		for (i =0; i < data.length; i++) {
+		 			$('#data').append(data[i]['message'] + '<br/>');
+		 			last_id = String(data[i]['_id']['$oid'])
+		 		}
+			});
+		});
+
+
+	</script>
+
+</body>
+</html>

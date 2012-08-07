@@ -8,6 +8,8 @@ import tornado.escape
 import tornado.gen
 import tornado.httpserver
 import logging
+import pymongo.json_util
+import json
 
 import time
 from tornado.ioloop import IOLoop
@@ -185,17 +187,41 @@ class FacebookDemoHandler(BaseHandler):
     def get(self):
         self.render("fb_demo.html", user=self.get_current_user(), fb_app_id=self.settings['facebook_app_id'] )
 
+class WildcardPathHandler(BaseHandler):
+    def initialize(self):
+        self.supported_path = ['good', 'nice']
 
-""" async demo """
+    """ prepare() called just before either get or post 
+    like a later version of init() """
+    def prepare(self):
+        print self.request.path
+        action = self.request.path.split('/')[-2]
+        if action not in self.supported_path:
+            self.write('<html><body>I dont like that url</body></html>')
+            self.finish()
+            return
+
+    def get(self, action):
+        self.write('<html><body>I am happy you went to '+action+'</body></html>')
+        self.finish()
+
+    def post(self, action):
+        self.write('<html><body>I am happy you went to '+action+'</body></html>')
+        self.finish()
+
+
+""" 
+async demo - creates a constantly loading webpage which updates from a file.
+'tail -f data/to_read.txt' >> webpage
+"""
 class TailHandler(BaseHandler):
-        
     @asynchronous
     def get(self):
         self.file = open('data/to_read.txt', 'r')
         self.pos = self.file.tell()
 
         def _read_file():
-            # Read some amout of bytes here. You can't read until newline as it 
+            # Read some amout of bytes here. You can't read until newline as it
             # would block
             line = self.file.read(40)
             last_pos = self.file.tell()
@@ -210,3 +236,40 @@ class TailHandler(BaseHandler):
 
             IOLoop.instance().add_timeout(time.time() + 1, _read_file)
         _read_file()
+
+class DataPusherHandler(BaseHandler):
+    #@asynchronous
+    def get(self):
+        data = self.application.syncdb['data_pusher'].find()
+        self.render("data_pusher.html", user=self.get_current_user(), data=data)
+
+    def post(self):
+        print 'POST DataPusherHandler'
+        user = self.get_current_user()
+        if not user:
+            user = 'not logged in '
+        message = self.get_argument("message")
+        msg = {}
+        msg['message'] = user + ' : '+message
+
+        self.application.syncdb['data_pusher'].insert(msg)
+        self.write('done')
+        self.finish()
+        return
+        #self.redirect('/pusher')
+
+class DataPusherRawHandler(BaseHandler):
+    def get(self):
+        def _read_data():
+            m_id = self.get_argument('id','')
+            print m_id
+            if m_id:
+                data = list(self.application.syncdb['data_pusher'].find(
+                    {'_id' : {'$gt':ObjectId(m_id)} }))
+            else:
+                data = list(self.application.syncdb['data_pusher'].find())
+
+            s = json.dumps(data, default=pymongo.json_util.default)
+            self.write(s)
+            self.flush()
+        _read_data()

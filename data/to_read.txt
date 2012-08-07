@@ -1,5 +1,3 @@
-hello
-everyone
-add
-TO THE END OF THIS FILE
+hello!
+go to data/to_read.txt and add some lines on the bottom. Watch them load!
 
