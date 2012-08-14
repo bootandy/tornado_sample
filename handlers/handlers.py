@@ -2,6 +2,8 @@ import base64
 from bson.objectid import ObjectId
 import os
 import bcrypt
+import hashlib 
+import urllib
 
 import tornado.auth
 import tornado.escape
@@ -186,6 +188,20 @@ class FacebookDemoHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
         self.render("fb_demo.html", user=self.get_current_user(), fb_app_id=self.settings['facebook_app_id'] )
+
+class GravatarHandler(BaseHandler):
+    @tornado.web.authenticated
+    def get(self):
+        # Set your variables here
+        email = "bootandy@gmail.com"
+        default = "http://failblog.files.wordpress.com/2012/08/epic-fail-photos-dating-fails-forever-dreaming-alone.jpg"
+        size = 40
+
+        # construct the url
+        gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest() + "?"
+        gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
+
+        self.render("grav.html", user=self.get_current_user(), icon=gravatar_url)
 
 class WildcardPathHandler(BaseHandler):
     def initialize(self):

@@ -27,6 +27,7 @@ class Application(tornado.web.Application):
         url(r'/', HelloHandler, name='index'),
         url(r'/hello', HelloHandler, name='hello'),
         url(r'/message', MessageHandler, name='message'),
+        url(r'/grav', GravatarHandler, name='grav'),
         url(r'/slidy', SlidyHandler, name='slidy'),
         url(r'/notification', NotificationHandler, name='notification'),
         url(r'/fb_demo', FacebookDemoHandler, name='fb_demo'),
