@@ -26,6 +26,7 @@ class Application(tornado.web.Application):
         handlers = [
         url(r'/', HelloHandler, name='index'),
         url(r'/hello', HelloHandler, name='hello'),
+        url(r'/email', EmailMeHandler, name='email'),
         url(r'/message', MessageHandler, name='message'),
         url(r'/grav', GravatarHandler, name='grav'),
         url(r'/slidy', SlidyHandler, name='slidy'),
@@ -54,7 +55,9 @@ class Application(tornado.web.Application):
             'twitter_consumer_secret' :'SECRET',
             'facebook_app_id': '180378538760459',
             'facebook_secret': '7b82b89eb6aa0d3359e2036e4d1eedf0',
-            'facebook_registration_redirect_url': 'http://localhost:8888/facebook_login',    
+            'facebook_registration_redirect_url': 'http://localhost:8888/facebook_login',
+            'mandrill_key': 'KEY',
+            'mandrill_url': 'https://mandrillapp.com/api/1.0/',
 
             'xsrf_cookies': False,
             'debug':True,
@@ -63,10 +66,6 @@ class Application(tornado.web.Application):
 
         tornado.web.Application.__init__(self, handlers, **settings) # debug=True ,
         
-        # Connect to mongodb
-        #self.db = asyncmongo.Client(pool_id='mydb', host=MONGO_SERVER, port=27017, dbname='thanks')
-
-        # sync is easy for now
         self.syncconnection = pymongo.Connection(MONGO_SERVER, 27017)
 
         if 'db' in overrides:

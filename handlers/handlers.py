@@ -16,9 +16,9 @@ import json
 import time
 from tornado.ioloop import IOLoop
 from tornado.web import asynchronous, RequestHandler, Application 
+from tornado.httpclient import AsyncHTTPClient
 
-
-class BaseHandler(tornado.web.RequestHandler):
+class BaseHandler(RequestHandler):
 
     def get_login_url(self):
         return u"/login"
@@ -143,11 +143,11 @@ class FacebookLoginHandler(LoginHandler, tornado.auth.FacebookGraphMixin):
         self.redirect("hello")        
 
 
-
 class LogoutHandler(BaseHandler):
     def get(self):
         self.clear_cookie("user")
         self.redirect(u"/login")
+
 
 class HelloHandler(BaseHandler):
     @tornado.web.authenticated
@@ -160,6 +160,41 @@ class HelloHandler(BaseHandler):
 
     def post(self):
         return self.get()
+
+class EmailMeHandler(BaseHandler):
+    @tornado.web.asynchronous
+    @tornado.gen.engine
+    def get(self):
+        http_client = AsyncHTTPClient()
+        mail_url = self.settings["mandrill_url"] + "/messages/send.json"
+        mail_data = {
+            "key": self.settings["mandrill_key"],
+            "message": {
+                "html": "html email from tornado sample app <b>bold</b>", 
+                "text": "plain text email from tornado sample app", 
+                "subject": "from tornado sample app", 
+                "from_email": "hello@retechnica.com", 
+                "from_name": "Hello Team", 
+                "to":[{"email": "sample@retechnica.com"}]
+            }
+        }
+        
+        # mail_data = {
+        #     "key": self.settings["mandrill_key"],
+        # }
+        #mail_url = self.settings["mandrill_url"] + "/users/info.json"
+
+        body = tornado.escape.json_encode(mail_data)
+        response = yield tornado.gen.Task(http_client.fetch, mail_url, method='POST', body=body)
+        logging.info(response)
+        logging.info(response.body)
+
+        if response.code == 200:
+            self.redirect('/?notification=sent')
+        else:
+            self.redirect('/?notification=FAIL')
+
+
 
 class MessageHandler(BaseHandler):
     @tornado.web.authenticated
@@ -190,18 +225,24 @@ class FacebookDemoHandler(BaseHandler):
         self.render("fb_demo.html", user=self.get_current_user(), fb_app_id=self.settings['facebook_app_id'] )
 
 class GravatarHandler(BaseHandler):
-    @tornado.web.authenticated
-    def get(self):
-        # Set your variables here
-        email = "bootandy@gmail.com"
-        default = "http://failblog.files.wordpress.com/2012/08/epic-fail-photos-dating-fails-forever-dreaming-alone.jpg"
+    
+    def build_grav_url(self, email):
+
+        #default = "http://thumbs.dreamstime.com/thumblarge_540/1284957171JgzjF1.jpg"
+        # random patterned background:
+        default = 'identicon'
         size = 40
 
         # construct the url
         gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest() + "?"
         gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
+        return gravatar_url
 
-        self.render("grav.html", user=self.get_current_user(), icon=gravatar_url)
+    def get(self):
+        email = self.get_argument('email', "sample@gmail.com")
+        self.render("grav.html", user=self.get_current_user(), email=email, icon=self.build_grav_url(email))
+
+
 
 class WildcardPathHandler(BaseHandler):
     def initialize(self):

@@ -1,11 +1,21 @@
 <html>
 <body>
-Hello {{user}} <a href='logout'>logout</a> <br/>
 
-<br/>
-Here is your gravatar:
-<img src='{{icon}}' alt='icon'>
 
+	<p>
+	Mr {{email}} your gravatar is:
+	</p>
+	<img src='{{icon}}' alt='icon'>
+
+	<hr/>
+	
+	<p> 
+		Get me another gravatar:
+		<form>
+			<label>Email / Handle:</label>
+			<input type='text' name='email' id='email' style='width:300px;'>
+		</form>
+	</p>
 </body>
 </html>
 
