@@ -1,12 +1,14 @@
 # Runs tests using lib/http_test_client which caches cookie values allowing us to login
 
 from tests.lib.http_test_client import *
-from tornado.testing import LogTrapTestCase, AsyncHTTPTestCase
+from tornado.testing import LogTrapTestCase, AsyncHTTPTestCase,AsyncTestCase, AsyncHTTPClient
 from app import Application
 import bcrypt
+from tornado.ioloop import IOLoop 
+import sys 
 
 
-class BaseHTTPTestCase(AsyncHTTPTestCase, LogTrapTestCase, HTTPClientMixin):
+class BaseHTTPTestCase(AsyncHTTPTestCase, HTTPClientMixin, LogTrapTestCase):
     def get_app(self):
         return Application(db='testdb')
  
@@ -22,12 +24,10 @@ class BaseHTTPTestCase(AsyncHTTPTestCase, LogTrapTestCase, HTTPClientMixin):
        self.client = TestClient(self)
 
 # Tests based around remembering the user id after login.
-
 class HandlersTestCase(BaseHTTPTestCase):
-
     def setUp(self):
         super(HandlersTestCase, self).setUp()
-        self._create_user('test_user', 'secret')  # use your imagination
+        self._create_user('test_user', 'secret') 
 
     def test_homepage(self):
         response = self.client.get('/login')
@@ -42,3 +42,18 @@ class HandlersTestCase(BaseHTTPTestCase):
         self.assertEqual(response.code, 200)
         self.assertTrue('please login' not in response.body)
         self.assertTrue('Hello test_user' in response.body)
+
+
+class AsyncHandlerTestCase(BaseHTTPTestCase):
+    def setUp(self):
+        super(AsyncHandlerTestCase, self).setUp()
+        self._create_user('test_user', 'secret') 
+
+    def test_email(self):
+        self.client = AsyncHTTPClient(self.io_loop)
+        response = self.fetch('/email' )
+        self.assertEqual(response.code, 200)
+        self.assertIn('notification', response.effective_url )
+
+    def get_new_ioloop(self): 
+        return IOLoop.instance() 

@@ -195,7 +195,6 @@ class EmailMeHandler(BaseHandler):
             self.redirect('/?notification=FAIL')
 
 
-
 class MessageHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
