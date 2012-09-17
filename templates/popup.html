@@ -58,9 +58,18 @@
 				$('body').append('<div id="mask"></div>');
 				$('#mask').fadeIn(300);
 				
+				// ESC -> close window
+				$(document).bind('keydown', function(e) { 
+		            if (e.which == 27) {
+		               $('.mask').remove();  
+		            }
+		        }); 
+
 				// Select first input / textarea in popup
-				 var input = $('.login-popup').find("input:first, textarea:first")
-	             input[0].focus();
+				var input = $('.login-popup').find("input:first, textarea:first")
+		        if (input[0] != null) {
+		            input[0].focus();
+		        }
 
 				return false;
 			});
