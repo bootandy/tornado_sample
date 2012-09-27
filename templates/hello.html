@@ -1,50 +1,67 @@
 <html>
+<head>
+   	<title>Home of demos</title>
+    <link href="/static/css/notification.css" rel="stylesheet" />
+</head>
 <body>
-Hello {{user}} <a href='logout'>logout</a> <br/><br/>
+    {% if notification %}
+        <div id='notification' style="display: none;">
+            <span>{{ notification }}</span>
+            <a href="#" class="close-notify">X</a>
+        </div>
+    {% end %}
+
+	Hello {{user}} <a href='logout'>logout</a> <br/><br/>
 
 
-<a href='message'>send new message</a>
-<br/>
-<a href='grav'>gravatar demo</a>
-<br/>
-<a href='tail'>Tailing the contents of data/to_read.txt</a>
-<br/>
-<a href='/pusher'>Data Pusher</a>
-<br/>
-<a href='/email'>Email Sender - (create an account with mandrill and setup API key in settings first)</a>
-<br/>
-<a href='/matcher/nice/'>Wildcard Matcher good url</a>
-<br/>
-<a href='/matcher/badbit/'>Wildcard Matcher bad url</a>
+	<a href='message'>send new message</a>
+	<br/>
+	<a href='grav'>gravatar demo</a>
+	<br/>
+	<a href='tail'>Tailing the contents of data/to_read.txt</a>
+	<br/>
+	<a href='/pusher'>Data Pusher</a>
+	<br/>
+	<a href='/email'>Email Sender - (create an account with mandrill and setup API key in settings first)</a>
+	<br/>
+	<a href='/matcher/nice/'>Wildcard Matcher good url</a>
+	<br/>
+	<a href='/matcher/badbit/'>Wildcard Matcher bad url</a>
+	<br/>
+	<a href='/back_to_where_you_came_from'> Returns user to previous page</a>
+
+	<p>HTML demos:</p>
+	<a href='notification?notification=A_message_4_you'>notifications</a>
+	<br/>
+	<a href='slidy'>slidy</a>
+	<br/>
+	<a href='menu'>menu generates tags</a>
+	<br/>
+	<a href='popup'>popup windows</a>
+	<br/>
+	<a href='fb_demo'>Facebook demo</a>
+	<br/>
+
+	<br/>
+	<br/>
+
+	Messages sent:
+
+	<table>
+		<th>From</th>
+		<th>To</th>
+		<th>Message</th>
+		{% for m in messages %}
+			<tr>
+				<td>{{ m['from']}}</td>
+				<td>{{ m['to']}}</td>
+				<td>{{ m['message']}}</td>
+			</tr>
+		{% end %}
+	</table>
 
 
-<p>HTML demos:</p>
-<a href='notification?notification=A_message_4_you'>notifications</a>
-<br/>
-<a href='slidy'>slidy</a>
-<br/>
-<a href='popup'>popup windows</a>
-<br/>
-<a href='fb_demo'>Facebook demo</a>
-<br/>
-
-<br/>
-<br/>
-
-Messages sent:
-
-<table>
-	<th>From</th>
-	<th>To</th>
-	<th>Message</th>
-	{% for m in messages %}
-		<tr>
-			<td>{{ m['from']}}</td>
-			<td>{{ m['to']}}</td>
-			<td>{{ m['message']}}</td>
-		</tr>
-	{% end %}
-</table>
-
+    <script src="/static/js/jquery-1.7.2.min.js"></script>
+    <script src="/static/js/notification.js"></script>
 </body>
 </html>

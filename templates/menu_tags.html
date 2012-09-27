@@ -1,0 +1,66 @@
+<html>
+<head>
+    <title>Menu</title>
+    <link rel="stylesheet" href="http://loopj.com/jquery-tokeninput/styles/token-input-facebook.css" type="text/css" />
+</head>
+<body>
+    <hr/>
+	<a href='/'>home</a>
+	<br/>
+
+    <h3>Start typing &amp; select some names:</h3>
+    <input class='invite_names' type='text' />
+    <div>
+    </div>
+
+    <hr/>
+    <p>This script uses <a href='http://loopj.com/jquery-tokeninput/'>jquery token input - read about it</a></p>
+
+    <script src="/static/js/jquery-1.7.2.min.js"> </script>
+    <script src="/static/js/jquery.tokeninput.js" ></script>
+    <script>
+		$(document).ready(function() {
+		    /* This code will call a webpage that will return a callback containing JSON data.
+		    The data_page will have code looking something like this:
+
+			    callback = self.get_argument('callback', '')
+		        for u in users:
+		            u_list.append({'name': u['user'], 'id': str(u['_id'])})
+
+		        json_result = json.dumps(u_list, default=pymongo.json_util.default)
+		        self.write(callback + '(' + json_result + ')')
+			*/
+
+		    // $(".invite_names").tokenInput("/data_page", {
+		    //     theme: "facebook",
+		    //     hintText: "Enter Grata Users",
+		    //     preventDuplicates: true,
+		    //     minChars: 1,
+		    //     crossDomain: true,
+		    // });
+
+
+			/* This code will look through a locally stored list: */
+
+			$(".invite_names").tokenInput(get_data(), {
+		        theme: "facebook",
+		        hintText: "I only have the names andy, antony, bob and cedric",
+		        preventDuplicates: true,
+		        minChars: 1,
+		        crossDomain: true,
+		    });
+
+		    function get_data() {
+		    	result = [];
+		    	result.push({'name':'andy', 'id':'1'});
+		    	result.push({'name':'antony', 'id':'1'});
+		    	result.push({'name':'bob', 'id':'2'});
+		    	result.push({'name':'cedric', 'id':'2'});
+		    	return result
+		    }
+
+		});
+    </script>
+</body>
+
+</html>

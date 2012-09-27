@@ -29,6 +29,7 @@ class Application(tornado.web.Application):
         url(r'/email', EmailMeHandler, name='email'),
         url(r'/message', MessageHandler, name='message'),
         url(r'/grav', GravatarHandler, name='grav'),
+        url(r'/menu', MenuTagsHandler, name='menu'),
         url(r'/slidy', SlidyHandler, name='slidy'),
         url(r'/notification', NotificationHandler, name='notification'),
         url(r'/fb_demo', FacebookDemoHandler, name='fb_demo'),
@@ -37,6 +38,7 @@ class Application(tornado.web.Application):
         url(r'/pusher', DataPusherHandler, name='push_demo'),
         url(r'/pusher_raw', DataPusherRawHandler, name='push_raw_demo'),
         url(r'/matcher/([^\/]+)/', WildcardPathHandler),
+        url(r'/back_to_where_you_came_from', ReferBackHandler, name='referrer'),
 
         url(r'/login', LoginHandler, name='login'),
         url(r'/twitter_login', TwitterLoginHandler, name='twitter_login'),
@@ -65,7 +67,7 @@ class Application(tornado.web.Application):
         }
 
         tornado.web.Application.__init__(self, handlers, **settings) # debug=True ,
-        
+
         self.syncconnection = pymongo.Connection(MONGO_SERVER, 27017)
 
         if 'db' in overrides:

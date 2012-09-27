@@ -5,6 +5,9 @@
     <link href="/static/css/notification.css" rel="stylesheet" />
 </head>
 <body>
+    <a href='/'>home</a>
+    <br/>
+
     {% if notification %}
         <div id='notification' style="display: none;">
             <span>{{ notification }}</span>
@@ -17,7 +20,7 @@
     <p>lorum ipsum</p>
     <p>your url is: {{request.uri}} </p>
 
-    
+
     <script src="/static/js/jquery-1.7.2.min.js"></script>
     <script src="/static/js/notification.js"></script>
 </body>

@@ -2,7 +2,7 @@ import base64
 from bson.objectid import ObjectId
 import os
 import bcrypt
-import hashlib 
+import hashlib
 import urllib
 
 import tornado.auth
@@ -12,10 +12,10 @@ import tornado.httpserver
 import logging
 import pymongo.json_util
 import json
-
+import urlparse
 import time
 from tornado.ioloop import IOLoop
-from tornado.web import asynchronous, RequestHandler, Application 
+from tornado.web import asynchronous, RequestHandler, Application
 from tornado.httpclient import AsyncHTTPClient
 
 class BaseHandler(RequestHandler):
@@ -29,6 +29,17 @@ class BaseHandler(RequestHandler):
             return tornado.escape.json_decode(user_json)
         else:
             return None
+
+    # Allows us to get the previous URL
+    def get_referring_url(self):
+        try:
+            _, _, referer, _, _, _ = urlparse.urlparse(self.request.headers.get('Referer'))
+            if referer:
+                return referer
+        # Test code will throw this if there was no 'previous' page
+        except AttributeError:
+            pass
+        return '/'
 
 
 class NotificationHandler(BaseHandler):
@@ -46,8 +57,11 @@ class PopupHandler(BaseHandler):
         messages = self.application.syncdb.messages.find()
         self.render("popup.html", notification=self.get_argument("notification","") )
 
-class LoginHandler(BaseHandler):
+class MenuTagsHandler(BaseHandler):
+    def get(self):
+        self.render("menu_tags.html", notification=self.get_argument("notification","") )
 
+class LoginHandler(BaseHandler):
     def get(self):
         messages = self.application.syncdb.messages.find()
         self.render("login.html", notification=self.get_argument("notification","") )
@@ -57,7 +71,7 @@ class LoginHandler(BaseHandler):
         password = self.get_argument("password", "")
 
         user = self.application.syncdb['users'].find_one( { 'user': email } )
-        
+
         # Warning bcrypt will block IO loop:
         if user and user['password'] and bcrypt.hashpw(password, user['password']) == user['password']:
             self.set_current_user(email)
@@ -75,7 +89,6 @@ class LoginHandler(BaseHandler):
 
 
 class RegisterHandler(LoginHandler):
-
     def get(self):
         self.render("register.html", next=self.get_argument("next","/"))
 
@@ -115,7 +128,7 @@ class TwitterLoginHandler(LoginHandler,
         print "Auth worked"
         #user_details = self.application.syncdb['users'].find_one( {'twitter': tw_user['username'] } )
         # Create user if user not found
-        
+
         self.set_current_user(tw_user['username'])
         self.redirect("hello")
 
@@ -140,7 +153,7 @@ class FacebookLoginHandler(LoginHandler, tornado.auth.FacebookGraphMixin):
         #user_details = self.application.syncdb['users'].find_one( {'facebook': fb_user['id']} )
         # Create user if user not found
         self.set_current_user(fb_user['id'])
-        self.redirect("hello")        
+        self.redirect("hello")
 
 
 class LogoutHandler(BaseHandler):
@@ -153,13 +166,14 @@ class HelloHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
         messages = self.get_messages()
-        self.render("hello.html", user=self.get_current_user(), messages=messages, notification=self.get_argument("notification","") )
-    
+        self.render("hello.html", user=self.get_current_user(), messages=messages, notification=self.get_argument("notification", "") )
+
     def get_messages(self):
         return self.application.syncdb.messages.find()
 
     def post(self):
         return self.get()
+
 
 class EmailMeHandler(BaseHandler):
     @tornado.web.asynchronous
@@ -170,15 +184,15 @@ class EmailMeHandler(BaseHandler):
         mail_data = {
             "key": self.settings["mandrill_key"],
             "message": {
-                "html": "html email from tornado sample app <b>bold</b>", 
-                "text": "plain text email from tornado sample app", 
-                "subject": "from tornado sample app", 
-                "from_email": "hello@retechnica.com", 
-                "from_name": "Hello Team", 
+                "html": "html email from tornado sample app <b>bold</b>",
+                "text": "plain text email from tornado sample app",
+                "subject": "from tornado sample app",
+                "from_email": "hello@retechnica.com",
+                "from_name": "Hello Team",
                 "to":[{"email": "sample@retechnica.com"}]
             }
         }
-        
+
         # mail_data = {
         #     "key": self.settings["mandrill_key"],
         # }
@@ -209,7 +223,7 @@ class MessageHandler(BaseHandler):
         msg['from'] = sent_from
         msg['to'] = sent_to
         msg['message'] = message
-        
+
         if self.save_message(msg):
             self.redirect(u"/hello?notification=" + tornado.escape.url_escape("Message Sent"))
         else:
@@ -218,13 +232,14 @@ class MessageHandler(BaseHandler):
     def save_message(self, msg):
         return self.application.syncdb['messages'].insert(msg)
 
+
 class FacebookDemoHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
         self.render("fb_demo.html", user=self.get_current_user(), fb_app_id=self.settings['facebook_app_id'] )
 
+
 class GravatarHandler(BaseHandler):
-    
     def build_grav_url(self, email):
 
         #default = "http://thumbs.dreamstime.com/thumblarge_540/1284957171JgzjF1.jpg"
@@ -247,7 +262,7 @@ class WildcardPathHandler(BaseHandler):
     def initialize(self):
         self.supported_path = ['good', 'nice']
 
-    """ prepare() called just before either get or post 
+    """ prepare() called just before either get or post
     like a later version of init() """
     def prepare(self):
         print self.request.path
@@ -266,7 +281,14 @@ class WildcardPathHandler(BaseHandler):
         self.finish()
 
 
-""" 
+class ReferBackHandler(BaseHandler):
+    def get(self):
+        print 'returning back to previous page'
+        message = "?notification=" + tornado.escape.url_escape("returning back to previous page")
+        self.redirect(self.get_referring_url() + message)
+
+
+"""
 async demo - creates a constantly loading webpage which updates from a file.
 'tail -f data/to_read.txt' >> webpage
 """
@@ -293,6 +315,7 @@ class TailHandler(BaseHandler):
             IOLoop.instance().add_timeout(time.time() + 1, _read_file)
         _read_file()
 
+
 class DataPusherHandler(BaseHandler):
     #@asynchronous
     def get(self):
@@ -313,6 +336,7 @@ class DataPusherHandler(BaseHandler):
         self.finish()
         return
         #self.redirect('/pusher')
+
 
 class DataPusherRawHandler(BaseHandler):
     def get(self):

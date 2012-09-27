@@ -3,11 +3,13 @@
     <title>FB demo</title>
 </head>
 <body>
+    <a href='/'>home</a>
+    <br/>
     <div id="fb-root"></div>
     <hr/>
     <h3>Launch FB auto request:</h3>
     <a href='javascript:my_script()'>click me to join our app</a>
-    
+
     <br/><br/>
     <a href='http://facebook.stackoverflow.com/questions/10248675/fb-ui-apprequests-dialog-popup-goes-blank-and-invitations-are-not-sent'> Problems with FB window not closing</a>
 
@@ -23,9 +25,9 @@
         });
 
         function my_script() {
-            FB.ui({ method: 'apprequests', 
+            FB.ui({ method: 'apprequests',
                     message: 'Join our app ',
-                }, 
+                },
                 function(response) {
                     alert('callback')
                 }

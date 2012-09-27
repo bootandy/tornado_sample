@@ -1,16 +1,25 @@
 <html>
 <body>
-	Hello {{user}} <a href='logout'>logout</a> <br/>
-
-
-	
+	Hello {{user}} <a href='logout'>logout</a>
 	<br/>
-	New Message to:
+	<a href='/'>home</a>
+	<br/>
+
+
+	<br/>
+	Demonstrates loading recent data.
+	<br/>
+	Pressing 'Send it' pushes the entered text to the DB.
+	<br/>
+	Pushing 'Load more' loads the new text since your last load.
+	<br/>
+	Note: It DOES NOT LOAD all new text - just the text you haven't seen yet
+	<br/>
 	<br/>
     <label class="grey" for="log">To Push:</label><br />
     <textarea name="message" style="width:99%" id="message" cols="80" rows = "10">
     </textarea>
-	<br />	
+	<br />
 
     <button id='poster' >Send it</button>
     <br/>
@@ -24,9 +33,9 @@
     	var last_id = -1
 	    $("#poster").click(function(){
 		  	$.ajax({
-			  	url:"/pusher", 
+			  	url:"/pusher",
 			  	type: "POST",
-				data:{'message':$("#message").val()}, 
+				data:{'message':$("#message").val()},
 		 	}).done(function() {
 		 	 	console.log('return');
 			});
@@ -38,11 +47,11 @@
 	    		data += 'id=' + last_id
 	    	}
 		  	$.ajax({
-			  	url:"/pusher_raw", 
+			  	url:"/pusher_raw",
 			  	type: "GET",
 			  	dataType:'json',
 			  	data: data,
-		 	}).done(function(data) { 
+		 	}).done(function(data) {
 		 		for (i =0; i < data.length; i++) {
 		 			$('#data').append(data[i]['message'] + '<br/>');
 		 			last_id = String(data[i]['_id']['$oid'])
