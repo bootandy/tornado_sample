@@ -42,29 +42,39 @@ class BaseHandler(RequestHandler):
         return '/'
 
 
+    def get_flash(self):
+        flash = self.get_secure_cookie('flash')
+        self.clear_cookie('flash')
+        return flash
+
+    def get_essentials(self):
+        mp = {k:''.join(v) for k,v in self.request.arguments.iteritems()}
+        print mp
+
+
 class NotificationHandler(BaseHandler):
     def get(self):
         messages = self.application.syncdb.messages.find()
-        self.render("notification.html", messages=messages, notification=self.get_argument("notification","") )
+        self.render("notification.html", messages=messages, notification=self.get_flash() )
 
 class SlidyHandler(BaseHandler):
     def get(self):
         messages = self.application.syncdb.messages.find()
-        self.render("slidy.html", messages=messages, notification=self.get_argument("notification","") )
+        self.render("slidy.html", messages=messages, notification=self.get_flash() )
 
 class PopupHandler(BaseHandler):
     def get(self):
         messages = self.application.syncdb.messages.find()
-        self.render("popup.html", notification=self.get_argument("notification","") )
+        self.render("popup.html", notification=self.get_flash() )
 
 class MenuTagsHandler(BaseHandler):
     def get(self):
-        self.render("menu_tags.html", notification=self.get_argument("notification","") )
+        self.render("menu_tags.html", notification=self.get_flash() )
 
 class LoginHandler(BaseHandler):
     def get(self):
         messages = self.application.syncdb.messages.find()
-        self.render("login.html", notification=self.get_argument("notification","") )
+        self.render("login.html", notification=self.get_flash() )
 
     def post(self):
         email = self.get_argument("email", "")
@@ -77,7 +87,7 @@ class LoginHandler(BaseHandler):
             self.set_current_user(email)
             self.redirect("hello")
         else:
-            error_msg = u"?notification=" + tornado.escape.url_escape("Login incorrect.")
+            self.set_secure_cookie('flash', "Login incorrect")
             self.redirect(u"/login" + error_msg)
 
     def set_current_user(self, user):
@@ -166,7 +176,7 @@ class HelloHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
         messages = self.get_messages()
-        self.render("hello.html", user=self.get_current_user(), messages=messages, notification=self.get_argument("notification", "") )
+        self.render("hello.html", user=self.get_current_user(), messages=messages, notification=self.get_flash() )
 
     def get_messages(self):
         return self.application.syncdb.messages.find()
@@ -204,16 +214,18 @@ class EmailMeHandler(BaseHandler):
         logging.info(response.body)
 
         if response.code == 200:
-            self.redirect('/?notification=sent')
+            self.set_secure_cookie('flash', "sent")
+            self.redirect('/')
         else:
-            self.redirect('/?notification=FAIL')
+            self.set_secure_cookie('flash', "FAIL")
+            self.redirect('/')
 
 
 class MessageHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
         users = self.application.syncdb['users'].find()
-        self.render("message.html", user=self.get_current_user(), users=users, notification=self.get_argument("notification","") )
+        self.render("message.html", user=self.get_current_user(), users=users, notification=self.get_flash() )
 
     def post(self):
         sent_to = self.get_argument('to')
@@ -225,7 +237,8 @@ class MessageHandler(BaseHandler):
         msg['message'] = message
 
         if self.save_message(msg):
-            self.redirect(u"/hello?notification=" + tornado.escape.url_escape("Message Sent"))
+            self.set_secure_cookie('flash', "Message Sent")
+            self.redirect(u"/hello")
         else:
             print "error_msg"
 
@@ -284,8 +297,8 @@ class WildcardPathHandler(BaseHandler):
 class ReferBackHandler(BaseHandler):
     def get(self):
         print 'returning back to previous page'
-        message = "?notification=" + tornado.escape.url_escape("returning back to previous page")
-        self.redirect(self.get_referring_url() + message)
+        self.set_secure_cookie("flash", "returning back to previous page")
+        self.redirect(self.get_referring_url())
 
 
 """
