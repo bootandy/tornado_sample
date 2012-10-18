@@ -55,7 +55,7 @@ class BaseHandler(RequestHandler):
 class NotificationHandler(BaseHandler):
     def get(self):
         messages = self.application.syncdb.messages.find()
-        self.render("notification.html", messages=messages, notification=self.get_flash() )
+        self.render("notification.html", messages=messages, notification='hello' )
 
 class SlidyHandler(BaseHandler):
     def get(self):
@@ -88,7 +88,7 @@ class LoginHandler(BaseHandler):
             self.redirect("hello")
         else:
             self.set_secure_cookie('flash', "Login incorrect")
-            self.redirect(u"/login" + error_msg)
+            self.redirect(u"/login")
 
     def set_current_user(self, user):
         print "setting "+user
