@@ -1,7 +1,7 @@
  #easy_install pip
  #pip install -r requirements.txt
- 
- pymongo==2.1
+
+ pymongo==2.3
  tornado==2.2
  py-bcrypt
  mox

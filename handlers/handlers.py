@@ -10,16 +10,17 @@ import tornado.escape
 import tornado.gen
 import tornado.httpserver
 import logging
-import pymongo.json_util
+import bson.json_util
 import json
 import urlparse
 import time
+import threading
+import functools
 from tornado.ioloop import IOLoop
 from tornado.web import asynchronous, RequestHandler, Application
 from tornado.httpclient import AsyncHTTPClient
 
 class BaseHandler(RequestHandler):
-
     def get_login_url(self):
         return u"/login"
 
@@ -172,6 +173,30 @@ class LogoutHandler(BaseHandler):
         self.redirect(u"/login")
 
 
+class ThreadHandler(tornado.web.RequestHandler):
+    def perform(self, callback):
+        #do something cuz hey, we're in a thread!
+        time.sleep(5)
+        output = 'foo'
+        tornado.ioloop.IOLoop.instance().add_callback(functools.partial(callback, output))
+
+    def initialize(self):
+        self.thread = None
+
+    @tornado.web.asynchronous
+    def get(self):
+        self.thread = threading.Thread(target=self.perform, args=(self.on_callback,))
+        self.thread.start()
+
+        self.write('In the request')
+        self.flush()
+
+    def on_callback(self, output):
+        logging.info('In on_callback()')
+        self.write("Thread output: %s" % output)
+        self.finish()
+
+
 class HelloHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
@@ -304,6 +329,7 @@ class ReferBackHandler(BaseHandler):
 """
 async demo - creates a constantly loading webpage which updates from a file.
 'tail -f data/to_read.txt' >> webpage
+Blocks. Can't be used by more than 1 user at a time.
 """
 class TailHandler(BaseHandler):
     @asynchronous
@@ -337,12 +363,16 @@ class DataPusherHandler(BaseHandler):
 
     def post(self):
         print 'POST DataPusherHandler'
-        user = self.get_current_user()
-        if not user:
+        try:
+            user = self.get_current_user()
+            if not user:
+                user = 'not logged in '
+        except:
             user = 'not logged in '
+
         message = self.get_argument("message")
         msg = {}
-        msg['message'] = user + ' : '+message
+        msg['message'] = user + ' : ' + message
 
         self.application.syncdb['data_pusher'].insert(msg)
         self.write('done')
@@ -362,7 +392,7 @@ class DataPusherRawHandler(BaseHandler):
             else:
                 data = list(self.application.syncdb['data_pusher'].find())
 
-            s = json.dumps(data, default=pymongo.json_util.default)
+            s = json.dumps(data, default=bson.json_util.default)
             self.write(s)
             self.flush()
         _read_data()

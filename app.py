@@ -39,6 +39,7 @@ class Application(tornado.web.Application):
         url(r'/pusher_raw', DataPusherRawHandler, name='push_raw_demo'),
         url(r'/matcher/([^\/]+)/', WildcardPathHandler),
         url(r'/back_to_where_you_came_from', ReferBackHandler, name='referrer'),
+        url(r'/thread', ThreadHandler, name='thread_handler'),
 
         url(r'/login', LoginHandler, name='login'),
         url(r'/twitter_login', TwitterLoginHandler, name='twitter_login'),
