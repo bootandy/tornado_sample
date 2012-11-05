@@ -72,6 +72,7 @@ class MenuTagsHandler(BaseHandler):
     def get(self):
         self.render("menu_tags.html", notification=self.get_flash() )
 
+
 class LoginHandler(BaseHandler):
     def get(self):
         messages = self.application.syncdb.messages.find()
@@ -97,6 +98,40 @@ class LoginHandler(BaseHandler):
             self.set_secure_cookie("user", tornado.escape.json_encode(user))
         else:
             self.clear_cookie("user")
+
+
+class NoneBlockingLogin(BaseHandler):
+    """ Runs Bcrypt in a thread - Allows tornado to server up other handlers but can not process multiple logins simultaneously"""
+    def get(self):
+        messages = self.application.syncdb.messages.find()
+        self.render("login.html", notification=self.get_flash() )
+
+    def initialize(self):
+        self.thread = None
+
+    @tornado.web.asynchronous
+    def post(self):
+        email = self.get_argument('email', '')
+        password = self.get_argument('password', '')
+        user = self.application.syncdb['users'].find_one( { 'user': email } )
+
+        self.thread = threading.Thread(target=self.compute_password, args=(password, user,))
+        self.thread.start()
+
+    def compute_password(self, password, user):
+        if user and 'password' in user:
+            if bcrypt.hashpw(password, user['password']) == user['password']:
+                tornado.ioloop.IOLoop.instance().add_callback(functools.partial(self._password_correct_callback, user['user']))
+                return
+        tornado.ioloop.IOLoop.instance().add_callback(functools.partial(self._password_fail_callback))
+
+    def _password_correct_callback(self, email):
+        self.set_current_user(email)
+        self.redirect(self.get_argument('next', '/'))
+
+    def _password_fail_callback(self):
+        self.set_flash('Error Login incorrect')
+        self.redirect('/login')
 
 
 class RegisterHandler(LoginHandler):

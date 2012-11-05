@@ -41,6 +41,7 @@ class Application(tornado.web.Application):
         url(r'/back_to_where_you_came_from', ReferBackHandler, name='referrer'),
         url(r'/thread', ThreadHandler, name='thread_handler'),
 
+        url(r'/login_no_block', NoneBlockingLogin, name='login_no_block'),
         url(r'/login', LoginHandler, name='login'),
         url(r'/twitter_login', TwitterLoginHandler, name='twitter_login'),
         url(r'/facebook_login', FacebookLoginHandler, name='facebook_login'),
