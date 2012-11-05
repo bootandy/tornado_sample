@@ -198,7 +198,7 @@ class ThreadHandler(tornado.web.RequestHandler):
 
 
 class HelloHandler(BaseHandler):
-    @tornado.web.authenticated
+    #@tornado.web.authenticated
     def get(self):
         messages = self.get_messages()
         self.render("hello.html", user=self.get_current_user(), messages=messages, notification=self.get_flash() )
