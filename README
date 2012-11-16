@@ -1,12 +1,23 @@
-simple tornado & mongodb app using authentication
+Simple Tornado & Mongodb app using authentication
 
 HTML demos for slidys, notifications & popup windows
 
-# ----- to Run tests: ------
+# ----- to Run app: ------
+cd sample
+pip install -r requirements.txt
+python app.py
+
+# ----- Run tests: ------
+cd sample
 python -m tornado.testing  discover
 
 # ---- Run single test ------
+cd sample
 python -m tornado.testing  tests.test_client
 
-# ----- to Run app: ------
-python app.py 
+# ----- Run Splinter Web Acceptance tests -------
+sudo apt-get install python-dev
+apt-get install libxml2-dev libxslt-dev
+pip install spinter
+cd splinter
+python -m tornado.testing  discover

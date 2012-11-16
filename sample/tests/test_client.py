@@ -6,6 +6,7 @@ from app import Application
 import bcrypt
 from tornado.ioloop import IOLoop
 import sys
+import unittest
 
 #from mock import MagicMock, Mock
 from handlers.handlers import FacebookLoginHandler
