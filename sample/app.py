@@ -3,7 +3,6 @@
 # Tornado imports
 import pymongo
 import uuid
-import datetime
 import tornado.ioloop
 import tornado.options
 import tornado.web
@@ -19,7 +18,7 @@ define("config_file", default="app_config.yml", help="app_config file")
 #MONGO_SERVER = '192.168.1.68'
 MONGO_SERVER = 'localhost'
 
-# Application class
+
 class Application(tornado.web.Application):
     def __init__(self, **overrides):
         #self.config = self._get_config()
@@ -40,6 +39,7 @@ class Application(tornado.web.Application):
         url(r'/matcher/([^\/]+)/', WildcardPathHandler),
         url(r'/back_to_where_you_came_from', ReferBackHandler, name='referrer'),
         url(r'/thread', ThreadHandler, name='thread_handler'),
+        url(r'/s3uploader', S3PhotoUploadHandler, name='photos'),
 
         url(r'/login_no_block', NoneBlockingLogin, name='login_no_block'),
         url(r'/login', LoginHandler, name='login'),
@@ -56,7 +56,7 @@ class Application(tornado.web.Application):
             'template_path': os.path.join(os.path.dirname(__file__), 'templates'),
             "cookie_secret":    base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes),
             'twitter_consumer_key': 'KEY',
-            'twitter_consumer_secret' :'SECRET',
+            'twitter_consumer_secret': 'SECRET',
             'facebook_app_id': '180378538760459',
             'facebook_secret': '7b82b89eb6aa0d3359e2036e4d1eedf0',
             'facebook_registration_redirect_url': 'http://localhost:8888/facebook_login',
@@ -64,20 +64,21 @@ class Application(tornado.web.Application):
             'mandrill_url': 'https://mandrillapp.com/api/1.0/',
 
             'xsrf_cookies': False,
-            'debug':True,
-            'log_file_prefix':"tornado.log",
+            'debug': True,
+            'log_file_prefix': "tornado.log",
         }
 
-        tornado.web.Application.__init__(self, handlers, **settings) # debug=True ,
+        tornado.web.Application.__init__(self, handlers, **settings)
 
         self.syncconnection = pymongo.Connection(MONGO_SERVER, 27017)
 
         if 'db' in overrides:
-            self.syncdb = self.syncconnection [overrides['db']]
+            self.syncdb = self.syncconnection[overrides['db']]
         else:
-            self.syncdb = self.syncconnection ["test-thank"]
+            self.syncdb = self.syncconnection["test-thank"]
 
         #self.syncconnection.close()
+
 
 # to redirect log file run python with : --log_file_prefix=mylog
 def main():

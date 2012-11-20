@@ -5,6 +5,10 @@ import bcrypt
 import hashlib
 import urllib
 
+import boto
+import cStringIO
+import Image
+
 import tornado.auth
 import tornado.escape
 import tornado.gen
@@ -19,6 +23,7 @@ import functools
 from tornado.ioloop import IOLoop
 from tornado.web import asynchronous, RequestHandler, Application
 from tornado.httpclient import AsyncHTTPClient
+
 
 class BaseHandler(RequestHandler):
     def get_login_url(self):
@@ -42,47 +47,49 @@ class BaseHandler(RequestHandler):
             pass
         return '/'
 
-
     def get_flash(self):
         flash = self.get_secure_cookie('flash')
         self.clear_cookie('flash')
         return flash
 
     def get_essentials(self):
-        mp = {k:''.join(v) for k,v in self.request.arguments.iteritems()}
+        mp = {k: ''.join(v) for k, v in self.request.arguments.iteritems()}
         print mp
 
 
 class NotificationHandler(BaseHandler):
     def get(self):
         messages = self.application.syncdb.messages.find()
-        self.render("notification.html", messages=messages, notification='hello' )
+        self.render("notification.html", messages=messages, notification='hello')
+
 
 class SlidyHandler(BaseHandler):
     def get(self):
         messages = self.application.syncdb.messages.find()
-        self.render("slidy.html", messages=messages, notification=self.get_flash() )
+        self.render("slidy.html", messages=messages, notification=self.get_flash())
+
 
 class PopupHandler(BaseHandler):
     def get(self):
         messages = self.application.syncdb.messages.find()
-        self.render("popup.html", notification=self.get_flash() )
+        self.render("popup.html", notification=self.get_flash())
+
 
 class MenuTagsHandler(BaseHandler):
     def get(self):
-        self.render("menu_tags.html", notification=self.get_flash() )
+        self.render("menu_tags.html", notification=self.get_flash())
 
 
 class LoginHandler(BaseHandler):
     def get(self):
         messages = self.application.syncdb.messages.find()
-        self.render("login.html", notification=self.get_flash() )
+        self.render("login.html", notification=self.get_flash())
 
     def post(self):
         email = self.get_argument("email", "")
         password = self.get_argument("password", "")
 
-        user = self.application.syncdb['users'].find_one( { 'user': email } )
+        user = self.application.syncdb['users'].find_one({'user': email})
 
         # Warning bcrypt will block IO loop:
         if user and user['password'] and bcrypt.hashpw(password, user['password']) == user['password']:
@@ -93,7 +100,7 @@ class LoginHandler(BaseHandler):
             self.redirect(u"/login")
 
     def set_current_user(self, user):
-        print "setting "+user
+        print "setting " + user
         if user:
             self.set_secure_cookie("user", tornado.escape.json_encode(user))
         else:
@@ -104,7 +111,7 @@ class NoneBlockingLogin(BaseHandler):
     """ Runs Bcrypt in a thread - Allows tornado to server up other handlers but can not process multiple logins simultaneously"""
     def get(self):
         messages = self.application.syncdb.messages.find()
-        self.render("login.html", notification=self.get_flash() )
+        self.render("login.html", notification=self.get_flash())
 
     def initialize(self):
         self.thread = None
@@ -113,7 +120,7 @@ class NoneBlockingLogin(BaseHandler):
     def post(self):
         email = self.get_argument('email', '')
         password = self.get_argument('password', '')
-        user = self.application.syncdb['users'].find_one( { 'user': email } )
+        user = self.application.syncdb['users'].find_one({'user': email})
 
         self.thread = threading.Thread(target=self.compute_password, args=(password, user,))
         self.thread.start()
@@ -136,12 +143,12 @@ class NoneBlockingLogin(BaseHandler):
 
 class RegisterHandler(LoginHandler):
     def get(self):
-        self.render("register.html", next=self.get_argument("next","/"))
+        self.render("register.html", next=self.get_argument("next", "/"))
 
     def post(self):
         email = self.get_argument("email", "")
 
-        already_taken = self.application.syncdb['users'].find_one( { 'user': email } )
+        already_taken = self.application.syncdb['users'].find_one({'user': email})
         if already_taken:
             error_msg = u"?error=" + tornado.escape.url_escape("Login name already taken")
             self.redirect(u"/login" + error_msg)
@@ -158,6 +165,7 @@ class RegisterHandler(LoginHandler):
         self.set_current_user(email)
 
         self.redirect("hello")
+
 
 class TwitterLoginHandler(LoginHandler,
                           tornado.auth.TwitterMixin):
@@ -236,7 +244,7 @@ class HelloHandler(BaseHandler):
     #@tornado.web.authenticated
     def get(self):
         messages = self.get_messages()
-        self.render("hello.html", user=self.get_current_user(), messages=messages, notification=self.get_flash() )
+        self.render("hello.html", user=self.get_current_user(), messages=messages, notification=self.get_flash())
 
     def get_messages(self):
         return self.application.syncdb.messages.find()
@@ -259,7 +267,7 @@ class EmailMeHandler(BaseHandler):
                 "subject": "from tornado sample app",
                 "from_email": "hello@retechnica.com",
                 "from_name": "Hello Team",
-                "to":[{"email": "sample@retechnica.com"}]
+                "to": [{"email": "sample@retechnica.com"}]
             }
         }
 
@@ -285,7 +293,7 @@ class MessageHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
         users = self.application.syncdb['users'].find()
-        self.render("message.html", user=self.get_current_user(), users=users, notification=self.get_flash() )
+        self.render("message.html", user=self.get_current_user(), users=users, notification=self.get_flash())
 
     def post(self):
         sent_to = self.get_argument('to')
@@ -309,7 +317,7 @@ class MessageHandler(BaseHandler):
 class FacebookDemoHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
-        self.render("fb_demo.html", user=self.get_current_user(), fb_app_id=self.settings['facebook_app_id'] )
+        self.render("fb_demo.html", user=self.get_current_user(), fb_app_id=self.settings['facebook_app_id'])
 
 
 class GravatarHandler(BaseHandler):
@@ -322,13 +330,12 @@ class GravatarHandler(BaseHandler):
 
         # construct the url
         gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest() + "?"
-        gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
+        gravatar_url += urllib.urlencode({'d': default, 's': str(size)})
         return gravatar_url
 
     def get(self):
         email = self.get_argument('email', "sample@gmail.com")
         self.render("grav.html", user=self.get_current_user(), email=email, icon=self.build_grav_url(email))
-
 
 
 class WildcardPathHandler(BaseHandler):
@@ -419,11 +426,11 @@ class DataPusherHandler(BaseHandler):
 class DataPusherRawHandler(BaseHandler):
     def get(self):
         def _read_data():
-            m_id = self.get_argument('id','')
+            m_id = self.get_argument('id', '')
             print m_id
             if m_id:
                 data = list(self.application.syncdb['data_pusher'].find(
-                    {'_id' : {'$gt':ObjectId(m_id)} }))
+                    {'_id': {'$gt': ObjectId(m_id)}}))
             else:
                 data = list(self.application.syncdb['data_pusher'].find())
 
@@ -431,3 +438,47 @@ class DataPusherRawHandler(BaseHandler):
             self.write(s)
             self.flush()
         _read_data()
+
+
+class S3PhotoUploadHandler(BaseHandler):
+    """ Ideally image resizing should be done with a queue and a seperate python process """
+    def get(self):
+        template_vars = {}
+
+        self.render('upload.html',
+            **template_vars
+        )
+
+    @tornado.web.asynchronous
+    def post(self):
+        file1 = self.request.files['file1'][0]
+        img = cStringIO.StringIO(file1['body'])
+        image = Image.open(img)
+
+        thread = threading.Thread(target=self.resize_the_image, args=(image,))
+        thread.start()
+
+    def resize_the_image(self, image):
+        im2 = image.resize((100, 100), Image.NEAREST)
+        out_im2 = cStringIO.StringIO()
+        im2.save(out_im2, 'PNG')
+        tornado.ioloop.IOLoop.instance().add_callback(functools.partial(self.upload_to_s3, out_im2))
+
+    def upload_to_s3(self, image2):
+        AWS_ACCESS_KEY_ID = ''
+        AWS_SECRET_ACCESS_KEY = ''
+
+        #credentials can be stored in environment AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+        conn = boto.connect_s3(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
+
+        #Connect to bucket and create key
+        b = conn.get_bucket('photos')
+        k = b.new_key('example5.png')
+
+        #Note we're setting contents from the in-memory string provided by cStringIO
+        k.set_contents_from_string(image2.getvalue(), headers={"Content-Type": "image/png"})
+        tornado.ioloop.IOLoop.instance().add_callback(functools.partial(self.image_uploaded))
+
+    def image_uploaded(self):
+        self.set_secure_cookie('flash', "File Uploaded")
+        self.redirect("/")
