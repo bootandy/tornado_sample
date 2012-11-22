@@ -7,3 +7,5 @@ py-bcrypt==0.2
 mox
 PIL==1.1.7
 boto==2.6.0
+
+# For non pip'd eggs:  pip install -e git+git://github.com/JeremyOT/Toto.git#egg=Toto
