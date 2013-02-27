@@ -21,6 +21,6 @@ python -m tornado.testing  tests.test_client
 
 # ----- Run Splinter Web Acceptance tests -------
 apt-get install libxml2-dev libxslt-dev
-pip install spinter
+pip install splinter
 cd splinter
 python -m tornado.testing  discover
