@@ -12,7 +12,7 @@ from tornado.web import url
 from handlers.handlers import *
 
 
-define("port", default=8888, type=int)
+define("port", default=8089, type=int)
 define("config_file", default="app_config.yml", help="app_config file")
 
 #MONGO_SERVER = '192.168.1.68'
@@ -70,7 +70,7 @@ class Application(tornado.web.Application):
 
         tornado.web.Application.__init__(self, handlers, **settings)
 
-        self.syncconnection = pymongo.Connection(MONGO_SERVER, 27017)
+        self.syncconnection = pymongo.MongoClient(MONGO_SERVER, 27017)
 
         if 'db' in overrides:
             self.syncdb = self.syncconnection[overrides['db']]

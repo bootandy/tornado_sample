@@ -154,7 +154,7 @@ class RegisterHandler(LoginHandler):
             self.redirect(u"/login" + error_msg)
 
         # Warning bcrypt will block IO loop:
-        password = self.get_argument("password", "")
+        password = self.get_argument("password", "").encode('utf-8')
         hashed_pass = bcrypt.hashpw(password, bcrypt.gensalt(8))
 
         user = {}
