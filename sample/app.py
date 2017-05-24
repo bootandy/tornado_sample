@@ -12,7 +12,7 @@ from tornado.web import url
 from handlers.handlers import *
 
 
-define("port", default=8089, type=int)
+define("port", default=8888, type=int)
 define("config_file", default="app_config.yml", help="app_config file")
 
 #MONGO_SERVER = '192.168.1.68'
