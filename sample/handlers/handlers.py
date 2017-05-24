@@ -7,7 +7,6 @@ import urllib
 
 import boto
 import cStringIO
-import Image
 
 import tornado.auth
 import tornado.escape
@@ -20,6 +19,8 @@ import urlparse
 import time
 import threading
 import functools
+
+from PIL import Image
 from tornado.ioloop import IOLoop
 from tornado.web import asynchronous, RequestHandler, Application
 from tornado.httpclient import AsyncHTTPClient
